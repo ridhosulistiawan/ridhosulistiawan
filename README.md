@@ -5,6 +5,6 @@
 - 📫 How to reach me 
   email : ridho3375@gmail.com
   instagram : instagram.com/muhmrdho
-  twitter : twitter.com/ridho7355
+  twitter : twitter.com/ridho7533
 
 <!------>
