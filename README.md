@@ -6,5 +6,6 @@
   email : ridho3375@gmail.com
   instagram : instagram.com/muhmrdho
   twitter : twitter.com/ridho7533
+  Page : ridhosulistiawan.netlify.app
 
 <!------>
