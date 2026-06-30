@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videotron Display - Amatic Font</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000; 
+            overflow: hidden; 
+            
+            /* Menggunakan Font Amatic SC */
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700; /* Dibuat Bold agar terbaca jelas di layar videotron */
+        }
+
+        #bg-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            /* Mode Cover (Video ditarik memenuhi layar, penyebab video resolusi kecil jadi blur) */
+            object-fit: cover; 
+            z-index: 1;
+            pointer-events: none; 
+        }
+
+        /* --- STYLING UNTUK TEKS DI ATAS VIDEO (0-15 Detik) --- */
+        .overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            
+            /* Background Gelap Sesuai Permintaan */
+            background-color: rgba(0, 0, 0, 0.7); /* Hitam dengan transparansi 70% */
+            padding: 15px 40px; /* Jarak antara teks dan kotak background */
+            border-radius: 10px; /* Sudut background membulat */
+            
+            text-align: center;
+            color: #ffffff;
+            font-size: 6vw; /* Ukuran font diperbesar untuk Amatic */
+            letter-spacing: 3px;
+            z-index: 5;
+            pointer-events: none; 
+            
+            /* Menyesuaikan lebar kotak agar pas dengan teks */
+            width: max-content;
+            max-width: 90%; 
+            
+            /* Animasi Fade In & Fade Out */
+            opacity: 0; 
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        .overlay-text.show {
+            opacity: 1; 
+        }
+
+        /* --- STYLING UNTUK LAYAR HITAM DI AKHIR VIDEO (Ending Sequence) --- */
+        #ending-screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #000000; 
+            z-index: 20; 
+            /* Flexbox dihapus agar tidak bentrok dengan posisi absolute anaknya */
+            
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #ending-screen.show {
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+
+        .ending-part {
+            position: absolute;
+            /* Dibuat persis seperti overlay-text agar presisi di tengah */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: max-content;
+            max-width: 90%;
+            text-align: center;
+            
+            color: #ffffff;
+            font-size: 5vw; /* Ukuran font untuk Amatic di part ending */
+            line-height: 1.2;
+            letter-spacing: 3px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .ending-part.show {
+            opacity: 1;
+        }
+
+        /* Khusus link email agar rapi */
+        .email-link {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsif untuk Mobile */
+        @media (max-width: 768px) {
+            .overlay-text { font-size: 8vw; padding: 10px 20px; white-space: normal; width: 85%; }
+            .ending-part { font-size: 8vw; white-space: normal; width: 85%; }
+        }
+    </style>
+</head>
+<body>
+
+    <video id="bg-video" muted playsinline>
+        <source src="https://worxcode.i-office.id/video.mp4" type="video/mp4">
+    </video>
+
+    <div id="text-1" class="overlay-text">THE WAY MODERN WORK SHOULD RUN</div>
+    <div id="text-2" class="overlay-text">THE INFRASTRUCTURE FOR MODERN INTELLIGENT WORK</div>
+    <div id="text-3" class="overlay-text">SIMPLICITY, WORKABILITY, Excellence</div>
+
+    <div id="ending-screen">
+        <div id="ending-part-1" class="ending-part">
+            TWO-TIME INNOVATION/EXCELLENCE<br>AWARD WINNER, ASIA PACIFIC
+        </div>
+        
+        <div id="ending-part-2" class="ending-part">
+            WORXCODE<br>
+            <a href="mailto:wxc@worxcode.io" class="email-link">WXC@WORXCODE.IO</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const video = document.getElementById("bg-video");
+            
+            const videoTexts = [
+                { el: document.getElementById("text-1"), start: 2, end: 4 },
+                { el: document.getElementById("text-2"), start: 7, end: 9 },
+                { el: document.getElementById("text-3"), start: 11, end: 13.5 }
+            ];
+
+            const endingScreen = document.getElementById("ending-screen");
+            const endPart1 = document.getElementById("ending-part-1");
+            const endPart2 = document.getElementById("ending-part-2");
+            
+            let isEndingSequence = false;
+
+            video.play().catch(e => console.log("Play error:", e));
+
+            video.addEventListener("timeupdate", function() {
+                if (isEndingSequence) return; 
+                
+                let cTime = video.currentTime;
+
+                videoTexts.forEach(item => {
+                    if (cTime >= item.start && cTime < item.end) {
+                        item.el.classList.add("show");
+                    } else {
+                        item.el.classList.remove("show");
+                    }
+                });
+
+                if (cTime >= 14.8) {
+                    startEndingSequence();
+                }
+            });
+
+            video.addEventListener("ended", startEndingSequence);
+
+            function startEndingSequence() {
+                if (isEndingSequence) return; 
+                isEndingSequence = true;
+
+                videoTexts.forEach(item => item.el.classList.remove("show"));
+
+                endingScreen.classList.add("show");
+
+                setTimeout(() => {
+                    endPart1.classList.add("show");
+                    
+                    setTimeout(() => {
+                        endPart1.classList.remove("show");
+                        
+                        setTimeout(() => {
+                            endPart2.classList.add("show");
+
+                            setTimeout(() => {
+                                endPart2.classList.remove("show");
+                                endingScreen.classList.remove("show"); 
+
+                                setTimeout(() => {
+                                    isEndingSequence = false;
+                                    video.currentTime = 0;
+                                    video.play();
+                                }, 500); 
+
+                            }, 3000); 
+                        }, 500);
+                    }, 2000); 
+                }, 500);
+            }
+        });
+    </script>
+
+</body>
+</html>
